@@ -12,11 +12,56 @@ import { Loader2, Code2, GitBranch } from 'lucide-react';
 
 const FlowChart = dynamic(() => import('@/components/FlowChart'), { ssr: false });
 
+const exampleSnippets = {
+  javascript: `function findMaxInArray(arr) {
+  if (arr.length === 0) {
+    return null;
+  }
+
+  let max = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > max) {
+      max = arr[i];
+    }
+  }
+  return max;
+}`,
+  python: `def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    pivot = arr[len(arr) // 2]
+    left = [x for x in arr if x < pivot]
+    middle = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+
+    return quicksort(left) + middle + quicksort(right)`,
+  typescript: `async function fetchUserData(userId: string): Promise<User> {
+  try {
+    const response = await fetch(\`/api/users/\${userId}\`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+}`
+};
+
 export default function Home() {
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('javascript');
   const [flowData, setFlowData] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const loadExample = () => {
+    setCode(exampleSnippets[language as keyof typeof exampleSnippets] || exampleSnippets.javascript);
+  };
 
   const analyzeCode = async () => {
     if (!code.trim()) return;
@@ -112,21 +157,30 @@ export default function Home() {
                 className="font-mono text-sm min-h-[400px] resize-none"
               />
 
-              <Button
-                onClick={analyzeCode}
-                disabled={isAnalyzing || !code.trim()}
-                className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
-                size="lg"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  'Analyze Code'
-                )}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={loadExample}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Load Example
+                </Button>
+                <Button
+                  onClick={analyzeCode}
+                  disabled={isAnalyzing || !code.trim()}
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700"
+                  size="lg"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    'Analyze Code'
+                  )}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
@@ -220,6 +274,11 @@ export default function Home() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-12 text-center text-sm text-slate-500 dark:text-slate-400">
+          <p>Built with Next.js, Claude AI, and ReactFlow for TreeHacks 2026</p>
+          <p className="mt-1">Paste any code to visualize its control flow instantly</p>
         </div>
       </div>
     </div>
